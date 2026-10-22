@@ -1,0 +1,16 @@
+=== CHAOCTIC STATISTICAL ANALYSIS REPORT ===
+
+[Grayscale Properties]
+Original Image: {'Width': 800, 'Height': 450, 'Minimum intensity': 0, 'Maximum intensity': 254, 'Mean intensity': 65.66743611111112, 'Standard deviation': 32.36064445577591}
+Encrypted Image: {'Width': 800, 'Height': 450, 'Minimum intensity': 1, 'Maximum intensity': 255, 'Mean intensity': 127.42894444444444, 'Standard deviation': 49.39300103362849}
+Decrypted Image: {'Width': 800, 'Height': 450, 'Minimum intensity': 0, 'Maximum intensity': 254, 'Mean intensity': 65.66743611111112, 'Standard deviation': 32.36064445577591}
+
+[Shannon Entropy]
+Original Entropy: 6.762058
+Encrypted Entropy: 7.631339
+Decrypted Entropy: 6.762058
+
+[Adjacent Pixel Correlation]
+Original Correlation: 0.967829
+Encrypted Correlation: 0.000195
+Decrypted Correlation: 0.967829
