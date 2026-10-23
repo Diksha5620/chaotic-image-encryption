@@ -607,7 +607,7 @@ with st.sidebar:
         """
         <div style="padding: 10px 0px 20px 0px;">
             <div class="sub-category"> IMAGE PROTECTION</div>
-            <div class="main-title">Chaoctic image encryption using AES-GCM</div>
+            <div class="main-title">Chaotic image encryption using AES-GCM</div>
         </div>
         """,
         unsafe_allow_html=True
