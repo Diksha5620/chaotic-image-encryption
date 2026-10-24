@@ -196,14 +196,10 @@ if not st.session_state.authenticated:
             <div class="auth-card">
                 <div style="text-align: center; margin-bottom: 25px;">
                     <div style="font-size: 44px; margin-bottom: 10px; filter: drop-shadow(0 0 12px rgba(124,58,237,0.6));">🛡️</div>
-<<<<<<< HEAD
                     <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Chaotic Image Encryption</h1>
-=======
                     <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Chaotic image encryption using AES-GCM</h1>
->>>>>>> 98202d5a435a463f848794ad1284862e894c3346
                     <p style="color: #c084fc; font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 600;">Secure Image Protection Gateway</p>
                 </div>
-            """,
             unsafe_allow_html=True
         )
         
