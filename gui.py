@@ -558,11 +558,11 @@ if st.session_state.nav_page == "🏠 Dashboard":
     st.markdown("### Security Overview")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown('<div class="metric-card"><div class="sub-category">ALGORITHM</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">AES-GCM</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Authenticated</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><div class="sub-category">ENCRYPTION ALGORITHM</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">AES-GCM</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Authenticated encryption</p></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div class="metric-card"><div class="sub-category">PROCESSING</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Native Res</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Full Resolution</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><div class="sub-category">IMAGE PROCESSING</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Image Based</h3><p style="font-size:11px; color:#9ca3af; margin:0;">One image at a time</p></div>', unsafe_allow_html=True)
     with col3:
-        st.markdown('<div class="metric-card"><div class="sub-category">PERFORMANCE</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Vectorized</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Ultra Fast</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><div class="sub-category">KEY MANAGEMENT</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Secure key</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Required for decryption</p></div>', unsafe_allow_html=True)
     with col4:
         st.markdown('<div class="metric-card"><div class="sub-category">STATUS</div><h3 style="color:#34d399; margin:8px 0 4px 0; font-size:18px;">Ready</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Operational</p></div>', unsafe_allow_html=True)
 
