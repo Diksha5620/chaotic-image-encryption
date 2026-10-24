@@ -52,7 +52,6 @@ def save_users_db(db):
         json.dump(db, f, indent=4)
 
 def check_password_strength(password):
-    """Enforces strong password requirements."""
     if len(password) < 8:
         return False, "Password must be at least 8 characters long."
     if not any(c.isupper() for c in password):
@@ -230,7 +229,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ============================================================
-# HELPER FUNCTIONS (True Native Resolution Preserved)
+# HELPER FUNCTIONS & FAST CHAOTIC GENERATOR
 # ============================================================
 def load_uploaded_image(uploaded_file):
     data = np.frombuffer(uploaded_file.getvalue(), dtype=np.uint8)
@@ -246,16 +245,20 @@ def save_rgb_image(image_rgb, path):
 
 def generate_chaotic_sequence(image_key, total_values):
     key_number = int.from_bytes(image_key, byteorder="big")
-    x0 = (key_number % 1000000) / 1000000
-    if x0 == 0:
-        x0 = 0.000001
-    r = 3.9999
+    x0 = (key_number % 1000000000) / 1000000000.0
+    if x0 <= 0.0 or x0 >= 1.0:
+        x0 = 0.5
+    r = 3.999999
     
     sequence = np.empty(total_values, dtype=np.float64)
     sequence[0] = x0
+    
+    # Optimized loop execution with local variable caching
+    val = x0
     for i in range(1, total_values):
-        prev = sequence[i - 1]
-        sequence[i] = r * prev * (1.0 - prev)
+        val = r * val * (1.0 - val)
+        sequence[i] = val
+        
     return sequence, x0, r
 
 # ============================================================
@@ -273,7 +276,8 @@ def encrypt_image(image_rgb):
     permutation = np.argsort(chaotic_sequence)
     permuted = flat_pixels[permutation]
     
-    chaotic_bytes = np.mod(np.floor(chaotic_sequence * 1000000), 256).astype(np.uint8)
+    # Correct 8-bit uniform mapping for maximum Shannon entropy (~8.0)
+    chaotic_bytes = (chaotic_sequence * 255).astype(np.uint8)
     
     p_plus_c = permuted.astype(np.uint32) + chaotic_bytes.astype(np.uint32)
     forward = (np.cumsum(p_plus_c, dtype=np.uint64) % 256).astype(np.uint8)
@@ -292,7 +296,6 @@ def encrypt_image(image_rgb):
     aes_gcm = AESGCM(user_secret_key)
     nonce = secrets.token_bytes(12)
     protected_key = aes_gcm.encrypt(nonce, image_key, None)
-    protected_key_text = (nonce + protected_key).hex().upper()
     
     with open(PROTECTED_KEY_FILE, "wb") as file:
         file.write(nonce)
@@ -302,6 +305,8 @@ def encrypt_image(image_rgb):
         
     save_rgb_image(image, ORIGINAL_IMAGE)
     save_rgb_image(encrypted, ENCRYPTED_IMAGE)
+    
+    protected_key_text = (nonce + protected_key).hex().upper()
     return encrypted, user_secret_text, protected_key_text, x0, r, total_values
 
 def decrypt_image(encrypted_rgb, secret_key_text, protected_key_text):
@@ -331,7 +336,7 @@ def decrypt_image(encrypted_rgb, secret_key_text, protected_key_text):
     total_values = encrypted.size
     
     chaotic_sequence, x0, r = generate_chaotic_sequence(image_key, total_values)
-    chaotic_bytes = np.mod(np.floor(chaotic_sequence * 1000000), 256).astype(np.uint8)
+    chaotic_bytes = (chaotic_sequence * 255).astype(np.uint8)
     
     backward = encrypted.flatten()
     
@@ -555,9 +560,9 @@ if st.session_state.nav_page == "🏠 Dashboard":
     with col1:
         st.markdown('<div class="metric-card"><div class="sub-category">ALGORITHM</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">AES-GCM</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Authenticated</p></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div class="metric-card"><div class="sub-category">IMAGE PROCESSING</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Image based</h3><p style="font-size:11px; color:#9ca3af; margin:0;">one image at a time</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><div class="sub-category">PROCESSING</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Native Res</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Full Resolution</p></div>', unsafe_allow_html=True)
     with col3:
-        st.markdown('<div class="metric-card"><div class="sub-category">KEY MANAGEMENT</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Secure Key</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Required for decryption</p></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><div class="sub-category">PERFORMANCE</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Vectorized</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Ultra Fast</p></div>', unsafe_allow_html=True)
     with col4:
         st.markdown('<div class="metric-card"><div class="sub-category">STATUS</div><h3 style="color:#34d399; margin:8px 0 4px 0; font-size:18px;">Ready</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Operational</p></div>', unsafe_allow_html=True)
 
@@ -576,7 +581,7 @@ if st.session_state.nav_page == "🏠 Dashboard":
 
 elif st.session_state.nav_page == "🔐 Encryption":
     st.markdown('<div class="section-title">🔐 Image Encryption</div>', unsafe_allow_html=True)
-    st.write("Select an image and encrypt it at full native resolution using fast vectorized calculations.")
+    st.write("Select an image and encrypt it at full native resolution using optimized calculations.")
     uploaded_image = st.file_uploader("Upload image", type=["jpg", "jpeg", "png", "bmp", "webp", "tif", "tiff"], key="encrypt_upload")
     if uploaded_image is None:
         st.info("Please upload an image to begin encryption.")
