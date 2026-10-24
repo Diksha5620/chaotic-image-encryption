@@ -200,6 +200,7 @@ if not st.session_state.authenticated:
                     <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Chaotic image encryption using AES-GCM</h1>
                     <p style="color: #c084fc; font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 600;">Secure Image Protection Gateway</p>
                 </div>
+            """,    
             unsafe_allow_html=True
         )
         
