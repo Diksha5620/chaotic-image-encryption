@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 # PAGE CONFIGURATION
 # ============================================================
 st.set_page_config(
-    page_title="Chaotic Image Encryption Using AES-GCM ",
+    page_title="Chaotic Image Encryption Using AES-GCM",
     page_icon="🔐",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -24,24 +24,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGES_FOLDER = os.path.join(BASE_DIR, "images")
 RESULTS_FOLDER = os.path.join(BASE_DIR, "results")
 KEY_FOLDER = os.path.join(BASE_DIR, "key")
-ORIGINAL_IMAGE = os.path.join(
-    RESULTS_FOLDER, "original_image.png"
-)
-ENCRYPTED_IMAGE = os.path.join(
-    RESULTS_FOLDER, "encrypted_image.png"
-)
-DECRYPTED_IMAGE = os.path.join(
-    RESULTS_FOLDER, "decrypted_image.png"
-)
-PROTECTED_KEY_FILE = os.path.join(
-    KEY_FOLDER, "protected_key.bin"
-)
-USER_SECRET_FILE = os.path.join(
-    KEY_FOLDER, "user_secret_key.txt"
-)
-USERS_JSON_FILE = os.path.join(
-    KEY_FOLDER, "users.json"
-)
+ORIGINAL_IMAGE = os.path.join(RESULTS_FOLDER, "original_image.png")
+ENCRYPTED_IMAGE = os.path.join(RESULTS_FOLDER, "encrypted_image.png")
+DECRYPTED_IMAGE = os.path.join(RESULTS_FOLDER, "decrypted_image.png")
+PROTECTED_KEY_FILE = os.path.join(KEY_FOLDER, "protected_key.bin")
+USER_SECRET_FILE = os.path.join(KEY_FOLDER, "user_secret_key.txt")
+USERS_JSON_FILE = os.path.join(KEY_FOLDER, "users.json")
 
 os.makedirs(IMAGES_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
@@ -144,7 +132,6 @@ st.markdown(
         margin-bottom: 15px;
         color: #ffffff;
     }
-    /* Gorgeous Glowing Auth Container */
     .auth-card {
         background: linear-gradient(145deg, #111827 0%, #1e1b4b 100%);
         border: 2px solid #7c3aed;
@@ -185,7 +172,7 @@ if "nav_page" not in st.session_state:
     st.session_state.nav_page = "🏠 Dashboard"
 
 # ============================================================
-# STUNNING REDESIGNED LOGIN / SIGNUP PORTAL
+# LOGIN / SIGNUP PORTAL
 # ============================================================
 if not st.session_state.authenticated:
     st.markdown("<br>", unsafe_allow_html=True)
@@ -196,10 +183,10 @@ if not st.session_state.authenticated:
             <div class="auth-card">
                 <div style="text-align: center; margin-bottom: 25px;">
                     <div style="font-size: 44px; margin-bottom: 10px; filter: drop-shadow(0 0 12px rgba(124,58,237,0.6));">🛡️</div>
-                    <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Chaotic image encryption using AES-GCM</h1>
+                    <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Chaotic Image Encryption</h1>
                     <p style="color: #c084fc; font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 600;">Secure Image Protection Gateway</p>
                 </div>
-            """,    
+            """,
             unsafe_allow_html=True
         )
         
@@ -246,41 +233,20 @@ if not st.session_state.authenticated:
 # HELPER FUNCTIONS (True Native Resolution Preserved)
 # ============================================================
 def load_uploaded_image(uploaded_file):
-    data = np.frombuffer(
-        uploaded_file.getvalue(),
-        dtype=np.uint8
-    )
-    image_bgr = cv2.imdecode(
-        data,
-        cv2.IMREAD_COLOR
-    )
+    data = np.frombuffer(uploaded_file.getvalue(), dtype=np.uint8)
+    image_bgr = cv2.imdecode(data, cv2.IMREAD_COLOR)
     if image_bgr is None:
-        raise ValueError(
-            "The selected file is not a valid image."
-        )
-    return cv2.cvtColor(
-        image_bgr,
-        cv2.COLOR_BGR2RGB
-    )
+        raise ValueError("The selected file is not a valid image.")
+    return cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
 def save_rgb_image(image_rgb, path):
-    image_bgr = cv2.cvtColor(
-        image_rgb,
-        cv2.COLOR_RGB2BGR
-    )
+    image_bgr = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
     if not cv2.imwrite(path, image_bgr):
-        raise IOError(
-            "Could not save image."
-        )
+        raise IOError("Could not save image.")
 
 def generate_chaotic_sequence(image_key, total_values):
-    key_number = int.from_bytes(
-        image_key,
-        byteorder="big"
-    )
-    x0 = (
-        key_number % 1000000
-    ) / 1000000
+    key_number = int.from_bytes(image_key, byteorder="big")
+    x0 = (key_number % 1000000) / 1000000
     if x0 == 0:
         x0 = 0.000001
     r = 3.9999
@@ -293,7 +259,7 @@ def generate_chaotic_sequence(image_key, total_values):
     return sequence, x0, r
 
 # ============================================================
-# OPTIMIZED VECTORIZED ENCRYPTION
+# FAST VECTORIZED NUMPY ENCRYPTION & DECRYPTION
 # ============================================================
 def encrypt_image(image_rgb):
     image = np.asarray(image_rgb, dtype=np.uint8)
@@ -301,67 +267,44 @@ def encrypt_image(image_rgb):
     total_values = image.size
     image_key = secrets.token_bytes(32)
     
-    chaotic_sequence, x0, r = generate_chaotic_sequence(
-        image_key,
-        total_values
-    )
+    chaotic_sequence, x0, r = generate_chaotic_sequence(image_key, total_values)
     
     flat_pixels = image.flatten()
     permutation = np.argsort(chaotic_sequence)
     permuted = flat_pixels[permutation]
     
-    chaotic_bytes = np.mod(
-        np.floor(chaotic_sequence * 1000000),
-        256
-    ).astype(np.uint8)
-    forward = np.empty_like(permuted)
-    forward[0] = (int(permuted[0]) + int(chaotic_bytes[0])) % 256
+    chaotic_bytes = np.mod(np.floor(chaotic_sequence * 1000000), 256).astype(np.uint8)
     
-    f_val = int(forward[0])
-    for i in range(1, total_values):
-        f_val = (int(permuted[i]) + f_val + int(chaotic_bytes[i])) % 256
-        forward[i] = f_val
+    p_plus_c = permuted.astype(np.uint32) + chaotic_bytes.astype(np.uint32)
+    forward = (np.cumsum(p_plus_c, dtype=np.uint64) % 256).astype(np.uint8)
+    
     shifted_bytes = np.roll(chaotic_bytes, 1)
-    mixed = (forward.astype(np.uint16) + shifted_bytes.astype(np.uint16)) % 256
-    mixed = mixed.astype(np.uint8)
-    backward = np.empty_like(mixed)
-    backward[-1] = (int(mixed[-1]) + int(chaotic_bytes[-1])) % 256
+    mixed = ((forward.astype(np.uint16) + shifted_bytes.astype(np.uint16)) % 256).astype(np.uint8)
     
-    b_val = int(backward[-1])
-    for i in range(total_values - 2, -1, -1):
-        b_val = (int(mixed[i]) + b_val + int(chaotic_bytes[i])) % 256
-        backward[i] = b_val
+    m_plus_c_rev = (mixed[::-1].astype(np.uint32) + chaotic_bytes[::-1].astype(np.uint32))
+    backward_rev = (np.cumsum(m_plus_c_rev, dtype=np.uint64) % 256).astype(np.uint8)
+    backward = backward_rev[::-1]
+    
     encrypted = backward.reshape(original_shape)
+    
     user_secret_key = secrets.token_bytes(32)
     user_secret_text = user_secret_key.hex().upper()
     aes_gcm = AESGCM(user_secret_key)
     nonce = secrets.token_bytes(12)
     protected_key = aes_gcm.encrypt(nonce, image_key, None)
     protected_key_text = (nonce + protected_key).hex().upper()
+    
     with open(PROTECTED_KEY_FILE, "wb") as file:
         file.write(nonce)
         file.write(protected_key)
     with open(USER_SECRET_FILE, "w", encoding="utf-8") as file:
         file.write(user_secret_text)
+        
     save_rgb_image(image, ORIGINAL_IMAGE)
     save_rgb_image(encrypted, ENCRYPTED_IMAGE)
-    return (
-        encrypted,
-        user_secret_text,
-        protected_key_text,
-        x0,
-        r,
-        total_values
-    )
+    return encrypted, user_secret_text, protected_key_text, x0, r, total_values
 
-# ============================================================
-# OPTIMIZED VECTORIZED DECRYPTION
-# ============================================================
-def decrypt_image(
-    encrypted_rgb,
-    secret_key_text,
-    protected_key_text
-):
+def decrypt_image(encrypted_rgb, secret_key_text, protected_key_text):
     try:
         secret_key = bytes.fromhex(secret_key_text.strip())
     except ValueError:
@@ -374,6 +317,7 @@ def decrypt_image(
         raise ValueError("Protected key must contain hexadecimal characters only.")
     if len(protected_data) <= 12:
         raise ValueError("Protected key is too short to be valid.")
+        
     nonce = protected_data[:12]
     protected_key = protected_data[12:]
     aes_gcm = AESGCM(secret_key)
@@ -381,44 +325,36 @@ def decrypt_image(
         image_key = aes_gcm.decrypt(nonce, protected_key, None)
     except Exception:
         raise ValueError("Incorrect secret key or protected key. AES-GCM authentication failed.")
+        
     encrypted = np.asarray(encrypted_rgb, dtype=np.uint8)
     original_shape = encrypted.shape
     total_values = encrypted.size
-    chaotic_sequence, x0, r = generate_chaotic_sequence(
-        image_key,
-        total_values
-    )
-    chaotic_bytes = np.mod(
-        np.floor(chaotic_sequence * 1000000),
-        256
-    ).astype(np.uint8)
+    
+    chaotic_sequence, x0, r = generate_chaotic_sequence(image_key, total_values)
+    chaotic_bytes = np.mod(np.floor(chaotic_sequence * 1000000), 256).astype(np.uint8)
+    
     backward = encrypted.flatten()
-    mixed = np.empty_like(backward)
-    mixed[-1] = (int(backward[-1]) - int(chaotic_bytes[-1])) % 256
     
-    for i in range(total_values - 2, -1, -1):
-        diff = int(backward[i]) - int(backward[i + 1]) - int(chaotic_bytes[i])
-        mixed[i] = diff % 256
+    b_diff = np.zeros(total_values, dtype=np.int32)
+    b_diff[:-1] = backward[:-1].astype(np.int32) - backward[1:].astype(np.int32) - chaotic_bytes[:-1].astype(np.int32)
+    b_diff[-1] = backward[-1].astype(np.int32) - chaotic_bytes[-1].astype(np.int32)
+    mixed = (b_diff % 256).astype(np.uint8)
+    
     shifted_bytes = np.roll(chaotic_bytes, 1)
-    forward = (mixed.astype(np.int32) - shifted_bytes.astype(np.int32)) % 256
-    forward = forward.astype(np.uint8)
-    permuted = np.empty_like(forward)
-    permuted[0] = (int(forward[0]) - int(chaotic_bytes[0])) % 256
+    forward = ((mixed.astype(np.int32) - shifted_bytes.astype(np.int32)) % 256).astype(np.uint8)
     
-    for i in range(1, total_values):
-        diff = int(forward[i]) - int(forward[i - 1]) - int(chaotic_bytes[i])
-        permuted[i] = diff % 256
+    f_diff = np.zeros(total_values, dtype=np.int32)
+    f_diff[0] = forward[0].astype(np.int32) - chaotic_bytes[0].astype(np.int32)
+    f_diff[1:] = forward[1:].astype(np.int32) - forward[:-1].astype(np.int32) - chaotic_bytes[1:].astype(np.int32)
+    permuted = (f_diff % 256).astype(np.uint8)
+    
     permutation = np.argsort(chaotic_sequence)
     inverse_permutation = np.argsort(permutation)
     original_flat = permuted[inverse_permutation]
     decrypted = original_flat.reshape(original_shape)
+    
     save_rgb_image(decrypted, DECRYPTED_IMAGE)
-    return (
-        decrypted,
-        x0,
-        r,
-        total_values
-    )
+    return decrypted, x0, r, total_values
 
 # ============================================================
 # ANALYSIS FUNCTIONS & FILE GENERATORS
@@ -426,19 +362,10 @@ def decrypt_image(
 def to_grayscale(image):
     if len(image.shape) == 2:
         return image
-    return cv2.cvtColor(
-        image,
-        cv2.COLOR_RGB2GRAY
-    )
+    return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
 def calculate_entropy(image):
-    histogram = cv2.calcHist(
-        [image],
-        [0],
-        None,
-        [256],
-        [0, 256]
-    ).flatten()
+    histogram = cv2.calcHist([image], [0], None, [256], [0, 256]).flatten()
     total = histogram.sum()
     if total == 0:
         return 0.0
@@ -476,7 +403,6 @@ def run_and_save_analysis():
     enc_gray = to_grayscale(encrypted)
     dec_gray = to_grayscale(decrypted)
     
-    # 1. Save original_histogram.png
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.hist(orig_gray.flatten(), bins=256, color='blue', alpha=0.7, range=(0, 256))
     ax.set_title("Original Image Histogram")
@@ -486,7 +412,6 @@ def run_and_save_analysis():
     fig.savefig(os.path.join(RESULTS_FOLDER, "original_histogram.png"))
     plt.close(fig)
     
-    # 2. Save encrypted_histogram.png
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.hist(enc_gray.flatten(), bins=256, color='purple', alpha=0.7, range=(0, 256))
     ax.set_title("Encrypted Image Histogram")
@@ -496,7 +421,6 @@ def run_and_save_analysis():
     fig.savefig(os.path.join(RESULTS_FOLDER, "encrypted_histogram.png"))
     plt.close(fig)
     
-    # 3. Save decrypted_histogram.png
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.hist(dec_gray.flatten(), bins=256, color='green', alpha=0.7, range=(0, 256))
     ax.set_title("Decrypted Image Histogram")
@@ -506,7 +430,6 @@ def run_and_save_analysis():
     fig.savefig(os.path.join(RESULTS_FOLDER, "decrypted_histogram.png"))
     plt.close(fig)
     
-    # 4. Save entropy_graph.png
     fig, ax = plt.subplots(figsize=(6, 4))
     ent_orig = calculate_entropy(orig_gray)
     ent_enc = calculate_entropy(enc_gray)
@@ -519,7 +442,6 @@ def run_and_save_analysis():
     fig.savefig(os.path.join(RESULTS_FOLDER, "entropy_graph.png"))
     plt.close(fig)
     
-    # 5. Save correlation_graph.png
     fig, ax = plt.subplots(figsize=(6, 4))
     sample_indices = np.random.choice(orig_gray[:, :-1].size, size=min(2000, orig_gray[:, :-1].size), replace=False)
     orig_x = orig_gray[:, :-1].flatten()[sample_indices]
@@ -532,7 +454,6 @@ def run_and_save_analysis():
     fig.savefig(os.path.join(RESULTS_FOLDER, "correlation_graph.png"))
     plt.close(fig)
     
-    # 6. Metrics calculation
     props_orig = image_properties(orig_gray)
     props_enc = image_properties(enc_gray)
     props_dec = image_properties(dec_gray)
@@ -565,7 +486,7 @@ Decrypted Correlation: {corr_dec:.6f}
     )
 
 # ============================================================
-# SIDEBAR NAVIGATION
+# SIDEBAR NAVIGATION & ROUTING
 # ============================================================
 with st.sidebar:
     st.markdown(
@@ -605,9 +526,6 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-# ============================================================
-# MAIN PAGE ROUTING
-# ============================================================
 if st.session_state.nav_page == "🏠 Dashboard":
     st.markdown(
         """
@@ -625,7 +543,7 @@ if st.session_state.nav_page == "🏠 Dashboard":
             <div style="max-width: 65%;">
                 <div style="color: #c084fc; font-weight: 600; font-size: 12px; margin-bottom: 8px;">WELCOME TO CHAOSCRYPT</div>
                 <h2 style="color: #ffffff; font-size: 26px; margin-top: 0; margin-bottom: 10px;">Protect your images.<br>Secure your data.</h2>
-                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 18px;">Chaotic Image Encryption using AES-GCM and Logistic Maps for ultimate privacy protection.</p>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 18px;">Chaotic Image Encryption using AES-GCM and Logistic Maps with high-speed NumPy vectorization.</p>
             </div>
         </div>
         """,
@@ -635,52 +553,31 @@ if st.session_state.nav_page == "🏠 Dashboard":
     st.markdown("### Security Overview")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(
-            '<div class="metric-card"><div class="sub-category">ENCRYPTION ALGORITHM</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">AES-GCM</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Authenticated encryption</p></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="metric-card"><div class="sub-category">ALGORITHM</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">AES-GCM</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Authenticated</p></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown(
-            '<div class="metric-card"><div class="sub-category">IMAGE PROCESSING</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Image Based</h3><p style="font-size:11px; color:#9ca3af; margin:0;">One image at a time</p></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="metric-card"><div class="sub-category">IMAGE PROCESSING</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Image based</h3><p style="font-size:11px; color:#9ca3af; margin:0;">one image at a time</p></div>', unsafe_allow_html=True)
     with col3:
-        st.markdown(
-            '<div class="metric-card"><div class="sub-category">KEY MANAGEMENT</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Secure Key</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Required for decryption</p></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="metric-card"><div class="sub-category">KEY MANAGEMENT</div><h3 style="color:#ffffff; margin:8px 0 4px 0; font-size:18px;">Secure Key</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Required for decryption</p></div>', unsafe_allow_html=True)
     with col4:
-        st.markdown(
-            '<div class="metric-card"><div class="sub-category">SYSTEM STATUS</div><h3 style="color:#34d399; margin:8px 0 4px 0; font-size:18px;">Ready</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Frontend operational</p></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="metric-card"><div class="sub-category">STATUS</div><h3 style="color:#34d399; margin:8px 0 4px 0; font-size:18px;">Ready</h3><p style="font-size:11px; color:#9ca3af; margin:0;">Operational</p></div>', unsafe_allow_html=True)
+
     st.markdown("### Quick Actions")
     qcol1, qcol2 = st.columns(2)
     with qcol1:
-        st.markdown(
-            '<div class="metric-card"><b>Encrypt an Image</b><p style="font-size:12px; color:#9ca3af;">Upload an image and protect it using the encryption system.</p></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="metric-card"><b>Encrypt an Image</b><p style="font-size:12px; color:#9ca3af;">Upload and protect an image at native resolution.</p></div>', unsafe_allow_html=True)
         if st.button("Open Encryption →", key="go_enc", type="primary"):
             st.session_state.nav_page = "🔐 Encryption"
             st.rerun()
     with qcol2:
-        st.markdown(
-            '<div class="metric-card"><b>Decrypt an Image</b><p style="font-size:12px; color:#9ca3af;">Restore your encrypted image using the correct key.</p></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="metric-card"><b>Decrypt an Image</b><p style="font-size:12px; color:#9ca3af;">Restore your encrypted image securely.</p></div>', unsafe_allow_html=True)
         if st.button("Open Decryption →", key="go_dec", type="primary"):
             st.session_state.nav_page = "🔓 Decryption"
             st.rerun()
 
 elif st.session_state.nav_page == "🔐 Encryption":
     st.markdown('<div class="section-title">🔐 Image Encryption</div>', unsafe_allow_html=True)
-    st.write("Select an image and encrypt it using the Logistic Map based chaotic transformation.")
-    uploaded_image = st.file_uploader(
-        "Upload image",
-        type=["jpg", "jpeg", "png", "bmp", "webp", "tif", "tiff"],
-        key="encrypt_upload"
-    )
+    st.write("Select an image and encrypt it at full native resolution using fast vectorized calculations.")
+    uploaded_image = st.file_uploader("Upload image", type=["jpg", "jpeg", "png", "bmp", "webp", "tif", "tiff"], key="encrypt_upload")
     if uploaded_image is None:
         st.info("Please upload an image to begin encryption.")
     else:
@@ -697,14 +594,7 @@ elif st.session_state.nav_page == "🔐 Encryption":
                 st.metric("Channels", image_rgb.shape[2])
             if st.button("🔐 Encrypt Image", type="primary", key="encrypt_button"):
                 with st.spinner("Encrypting image..."):
-                    (
-                        encrypted,
-                        secret_key,
-                        protected_key_text,
-                        x0,
-                        r,
-                        total_values
-                    ) = encrypt_image(image_rgb)
+                    encrypted, secret_key, protected_key_text, x0, r, total_values = encrypt_image(image_rgb)
                 st.session_state.encrypted_result = {
                     "image": encrypted,
                     "secret_key": secret_key,
@@ -717,48 +607,42 @@ elif st.session_state.nav_page == "🔐 Encryption":
                 st.success("Encryption completed successfully.")
         except Exception as error:
             st.error(f"Encryption error: {error}")
+            
     if st.session_state.encrypted_result is not None:
         result = st.session_state.encrypted_result
         st.divider()
         st.subheader("Encrypted Image")
-        st.image(result["image"], caption="Encrypted Image", width=450)
+        st.image(result.get("image"), caption="Encrypted Image", width=450)
+        
         st.subheader("🔑 Secret Key")
-        st.warning("Keep this 64-character key safe. You will need it, together with the Protected Key below, to decrypt this image.")
-        st.code(result["secret_key"], language="text")
-        st.download_button(
-            "⬇️ Download Secret Key",
-            data=result["secret_key"],
-            file_name="user_secret_key.txt",
-            mime="text/plain",
-            key="download_secret_key"
-        )
+        st.warning("Keep this 64-character key safe. You will need it together with the Protected Key to decrypt.")
+        st.code(result.get("secret_key", ""), language="text")
+        st.download_button("⬇️ Download Secret Key", data=result.get("secret_key", ""), file_name="user_secret_key.txt", mime="text/plain", key="dl_sec")
+        
         st.subheader("🛡️ Protected Key")
         st.warning("You will also need this Protected Key, together with the Secret Key above, to decrypt this image.")
-        st.code(result["protected_key"], language="text")
-        st.download_button(
-            "⬇️ Download Protected Key",
-            data=result["protected_key"],
-            file_name="protected_key.txt",
-            mime="text/plain",
-            key="download_protected_key"
-        )
-        st.write(f"Logistic Map parameter x₀: {result['x0']}")
-        st.write(f"Logistic Map parameter r: {result['r']}")
-        st.write(f"Chaotic sequence length: {result['total_values']}")
+        st.code(result.get("protected_key", ""), language="text")
+        st.download_button("⬇️ Download Protected Key", data=result.get("protected_key", ""), file_name="protected_key.txt", mime="text/plain", key="dl_prot")
+        
+        st.markdown("### 🧬 Chaotic Map Parameters")
+        st.write(f"Logistic Map parameter x₀: `{result.get('x0', 'N/A')}`")
+        st.write(f"Logistic Map parameter r: `{result.get('r', 'N/A')}`")
+        st.write(f"Chaotic sequence length: `{result.get('total_values', 'N/A')}`")
 
 elif st.session_state.nav_page == "🔓 Decryption":
     st.markdown('<div class="section-title">🔓 Image Decryption</div>', unsafe_allow_html=True)
-    st.write("Restore your encrypted image using your Secret Key and Protected Key (either by uploading their text files or entering them).")
+    st.write("Restore your encrypted image using your Secret Key and Protected Key.")
     encrypted_rgb = None
     source_label = None
     if st.session_state.encrypted_result is not None:
-        encrypted_rgb = st.session_state.encrypted_result["image"]
-        source_label = "Encrypted image from the Encrypt tab"
+        encrypted_rgb = st.session_state.encrypted_result.get("image")
+        source_label = "Encrypted image from Encryption tab"
     elif os.path.isfile(ENCRYPTED_IMAGE):
         encrypted_bgr = cv2.imread(ENCRYPTED_IMAGE, cv2.IMREAD_UNCHANGED)
         if encrypted_bgr is not None:
             encrypted_rgb = cv2.cvtColor(encrypted_bgr, cv2.COLOR_BGR2RGB)
             source_label = "results/encrypted_image.png"
+            
     if encrypted_rgb is None:
         st.info("Encrypt an image first — this section will then let you decrypt it.")
     else:
@@ -766,26 +650,15 @@ elif st.session_state.nav_page == "🔓 Decryption":
         st.image(encrypted_rgb, caption=source_label, width=450)
         st.markdown("### 📁 Upload Key Files (Optional)")
         col_k1, col_k2 = st.columns(2)
-        uploaded_secret_file = col_k1.file_uploader("Upload Secret Key File (.txt)", type=["txt"], key="up_sec")
-        uploaded_protected_file = col_k2.file_uploader("Upload Protected Key File (.txt)", type=["txt"], key="up_prot")
-        default_secret_key = ""
-        if uploaded_secret_file is not None:
-            default_secret_key = uploaded_secret_file.getvalue().decode("utf-8").strip()
-        default_protected_key = ""
-        if uploaded_protected_file is not None:
-            default_protected_key = uploaded_protected_file.getvalue().decode("utf-8").strip()
-        secret_key = st.text_input(
-            "Secret Key (64 hexadecimal characters)",
-            value=default_secret_key,
-            type="password",
-            key="decrypt_secret"
-        )
-        protected_key_text = st.text_input(
-            "Protected Key (hexadecimal)",
-            value=default_protected_key,
-            type="password",
-            key="decrypt_protected_key"
-        )
+        up_sec_file = col_k1.file_uploader("Upload Secret Key (.txt)", type=["txt"], key="up_sec")
+        up_prot_file = col_k2.file_uploader("Upload Protected Key (.txt)", type=["txt"], key="up_prot")
+        
+        default_secret = up_sec_file.getvalue().decode("utf-8").strip() if up_sec_file else ""
+        default_protected = up_prot_file.getvalue().decode("utf-8").strip() if up_prot_file else ""
+        
+        secret_key = st.text_input("Secret Key (64 hex chars)", value=default_secret, type="password", key="decrypt_secret")
+        protected_key_text = st.text_input("Protected Key (hex)", value=default_protected, type="password", key="decrypt_protected_key")
+        
         if st.button("🔓 Decrypt Image", type="primary", key="decrypt_button"):
             if not secret_key.strip():
                 st.error("Please enter the Secret Key.")
@@ -794,16 +667,7 @@ elif st.session_state.nav_page == "🔓 Decryption":
             else:
                 with st.spinner("Decrypting image..."):
                     try:
-                        (
-                            decrypted,
-                            x0,
-                            r,
-                            total_values
-                        ) = decrypt_image(
-                            encrypted_rgb,
-                            secret_key,
-                            protected_key_text
-                        )
+                        decrypted, x0, r, total_values = decrypt_image(encrypted_rgb, secret_key, protected_key_text)
                         st.session_state.decrypted_result = {
                             "image": decrypted,
                             "x0": x0,
@@ -813,24 +677,19 @@ elif st.session_state.nav_page == "🔓 Decryption":
                         st.success("Decryption completed successfully.")
                     except Exception as error:
                         st.error(f"Decryption failed: {error}")
+                        
         if st.session_state.decrypted_result is not None:
             result = st.session_state.decrypted_result
             st.divider()
             st.subheader("Decrypted Image")
-            st.image(result["image"], caption="Decrypted Image", width=450)
+            st.image(result.get("image"), caption="Decrypted Image", width=450)
             if os.path.isfile(DECRYPTED_IMAGE):
                 with open(DECRYPTED_IMAGE, "rb") as file:
-                    st.download_button(
-                        "⬇️ Download Decrypted Image",
-                        data=file,
-                        file_name="decrypted_image.png",
-                        mime="image/png",
-                        key="download_decrypted"
-                    )
+                    st.download_button("⬇️ Download Decrypted Image", data=file, file_name="decrypted_image.png", mime="image/png", key="dl_dec")
 
 elif st.session_state.nav_page == "📊 Security Analysis":
     st.markdown('<div class="section-title">📊 Security & Statistical Analysis</div>', unsafe_allow_html=True)
-    st.write("Compare the original, encrypted, and decrypted images using statistical analysis.")
+    st.write("Compare the original, encrypted, and decrypted images using statistical metrics.")
     if not os.path.isfile(ORIGINAL_IMAGE) or not os.path.isfile(ENCRYPTED_IMAGE) or not os.path.isfile(DECRYPTED_IMAGE):
         st.warning("Please complete both encryption and decryption cycles first to populate analysis data.")
     else:
@@ -843,18 +702,8 @@ elif st.session_state.nav_page == "📊 Security Analysis":
                         ent_orig, ent_enc, ent_dec,
                         corr_orig, corr_enc, corr_dec
                     ) = run_and_save_analysis()
-                    st.success("Analysis complete! All files generated in results folder.")
+                    st.success("Analysis complete! All files generated successfully.")
                     
-                    st.text(
-                        "Files created in results folder:\n"
-                        "1. original_histogram.png\n"
-                        "2. encrypted_histogram.png\n"
-                        "3. decrypted_histogram.png\n"
-                        "4. entropy_graph.png\n"
-                        "5. correlation_graph.png\n"
-                        "6. analysis_results.txt\n\n"
-                        "No original/encrypted/decrypted image was modified."
-                    )
                     st.markdown("### Image Comparison")
                     col1, col2, col3 = st.columns(3)
                     with col1:
@@ -863,6 +712,7 @@ elif st.session_state.nav_page == "📊 Security Analysis":
                         st.image(encrypted, caption="Encrypted", width=250)
                     with col3:
                         st.image(decrypted, caption="Decrypted", width=250)
+                        
                     st.markdown("### Grayscale Properties")
                     prop_table = {
                         "Property": list(props_orig.keys()),
@@ -871,16 +721,19 @@ elif st.session_state.nav_page == "📊 Security Analysis":
                         "Decrypted": list(props_dec.values())
                     }
                     st.table(prop_table)
+                    
                     st.markdown("### Shannon Entropy")
                     ecol1, ecol2, ecol3 = st.columns(3)
                     ecol1.metric("Original Entropy", f"{ent_orig:.6f}")
                     ecol2.metric("Encrypted Entropy", f"{ent_enc:.6f}")
                     ecol3.metric("Decrypted Entropy", f"{ent_dec:.6f}")
+                    
                     st.markdown("### Adjacent Pixel Correlation")
                     ccol1, ccol2, ccol3 = st.columns(3)
                     ccol1.metric("Original Correlation", f"{corr_orig:.6f}")
                     ccol2.metric("Encrypted Correlation", f"{corr_enc:.6f}")
                     ccol3.metric("Decrypted Correlation", f"{corr_dec:.6f}")
+                    
                     st.markdown("### Visual Analysis & Graphs")
                     gcol1, gcol2, gcol3 = st.columns(3)
                     with gcol1:
@@ -889,9 +742,10 @@ elif st.session_state.nav_page == "📊 Security Analysis":
                         st.image(os.path.join(RESULTS_FOLDER, "encrypted_histogram.png"), caption="Encrypted Histogram")
                     with gcol3:
                         st.image(os.path.join(RESULTS_FOLDER, "decrypted_histogram.png"), caption="Decrypted Histogram")
+                        
                     gcol4, gcol5 = st.columns(2)
                     with gcol4:
-                        st.image(os.path.join(RESULTS_FOLDER, "entropy_graph.png"), caption="Shannon Entropy Comparison")
+                        st.image(os.path.join(RESULTS_FOLDER, "entropy_graph.png"), caption="Entropy Comparison")
                     with gcol5:
                         st.image(os.path.join(RESULTS_FOLDER, "correlation_graph.png"), caption="Correlation Graph")
                 except Exception as error:
